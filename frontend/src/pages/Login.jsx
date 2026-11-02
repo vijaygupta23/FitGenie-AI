@@ -1,15 +1,61 @@
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import API from "../api/axios";
 
 const Login = () => {
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    console.log("LOGIN DATA:", formData);
+
+    try {
+      setLoading(true);
+
+      const response = await API.post("/auth/login", formData);
+
+      console.log("LOGIN SUCCESS:", response.data);
+
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      // localStorage.setItem("token", response.data.token);
+
+      alert("Login Successful");
+
+      navigate("/dashboard");
+    } catch (error) {
+      console.log("LOGIN ERROR:", error);
+      console.log("RESPONSE:", error.response?.data);
+      console.log("STATUS:", error.response?.status);
+
+      alert(error.response?.data?.message || error.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="h-screen bg-[#0B0F19] flex items-center justify-center px-6  overflow-hidden">
-
       <div className="w-full max-w-4xl py-1 min-h-[85vh] bg-[#111827] rounded-3xl overflow-hidden border border-white/10 shadow-2xl grid lg:grid-cols-2">
-
         {/* LEFT SIDE IMAGE */}
 
         <div className="hidden lg:flex items-end justify-center bg-gradient-to-br from-[#00E5A8]/20 to-[#0B0F19] relative overflow-hidden">
-
           {/* Glow Effect */}
           <div className="absolute w-[400px] h-[400px] bg-[#00E5A8]/10 rounded-full blur-3xl"></div>
 
@@ -26,32 +72,29 @@ const Login = () => {
               translate-y-8
             "
           />
-
         </div>
 
         {/* RIGHT SIDE FORM */}
 
         <div className="flex flex-col justify-center px-8 md:px-12">
-
-          <h1 className="text-4xl font-bold text-white">
-            Welcome Back 👋
-          </h1>
+          <h1 className="text-4xl font-bold text-white">Welcome Back 👋</h1>
 
           <p className="text-gray-400 mt-3">
             Sign in to continue your fitness journey.
           </p>
 
-          <form className="mt-8 space-y-5">
-
+          <form onSubmit={handleSubmit} className="mt-8 space-y-5">
             {/* Email */}
 
             <div>
-              <label className="text-sm text-gray-300">
-                Email
-              </label>
+              <label className="text-sm text-gray-300">Email</label>
 
               <input
                 type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter your email"
                 placeholder="Enter your email"
                 className="
                   w-full
@@ -73,12 +116,14 @@ const Login = () => {
             {/* Password */}
 
             <div>
-              <label className="text-sm text-gray-300">
-                Password
-              </label>
+              <label className="text-sm text-gray-300">Password</label>
 
               <input
                 type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Enter password"
                 placeholder="Enter password"
                 className="
                   w-full
@@ -111,6 +156,15 @@ const Login = () => {
             {/* Login Button */}
 
             <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-[#00E5A8] hover:bg-[#00d49a] text-black font-semibold py-3 rounded-xl transition duration-300"
+            >
+              {loading ? "Logging in..." : "Login"}
+            </button>
+
+            {/* <button 
+            
               className="
                 w-full
                 bg-[#00E5A8]
@@ -124,22 +178,17 @@ const Login = () => {
               "
             >
               Login
-            </button>
-
+            </button> */}
           </form>
 
           {/* Divider */}
 
           <div className="flex items-center gap-4 my-6">
-
             <div className="flex-1 h-px bg-white/10"></div>
 
-            <span className="text-gray-500 text-sm">
-              OR
-            </span>
+            <span className="text-gray-500 text-sm">OR</span>
 
             <div className="flex-1 h-px bg-white/10"></div>
-
           </div>
 
           {/* Google Login */}
@@ -162,37 +211,18 @@ const Login = () => {
           {/* Signup */}
 
           <p className="mt-6 text-center text-gray-400">
-
             Don't have an account?
-
-            <Link
-              to="/register"
-              className="text-[#00E5A8] ml-2 font-medium"
-            >
+            <Link to="/register" className="text-[#00E5A8] ml-2 font-medium">
               Sign Up
             </Link>
-
           </p>
-
         </div>
-
       </div>
-
     </div>
   );
 };
 
 export default Login;
-
-
-
-
-
-
-
-
-
-
 
 // import { Link } from "react-router-dom";
 

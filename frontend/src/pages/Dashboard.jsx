@@ -1,6 +1,9 @@
 import { FaBell } from "react-icons/fa";
 import { IoSearch } from "react-icons/io5";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import API from "../api/axios";
 import {
   FaDumbbell,
   FaAppleAlt,
@@ -21,7 +24,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { useState } from "react";
+// import { useState } from "react";
 
 const data = [
   { day: "Mon", value: 40 },
@@ -34,7 +37,49 @@ const data = [
 ];
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const response = await API.get("/auth/profile", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        console.log("PROFILE:", response.data);
+
+        setUser(response.data.user);
+      } catch (error) {
+        console.log("PROFILE ERROR:", error);
+
+        if (error.response?.status === 401) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          window.location.href = "/login";
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0B0F19] flex items-center justify-center">
+        <p className="text-[#00E5A8] text-lg">Loading dashboard...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#050B18] text-white flex">
       {/* SIDEBAR */}
@@ -213,24 +258,12 @@ text-3xl
 
         {/* HEADER */}
 
-        {/* <div className="mb-8"> */}
-        {/* <h1 className="text-3xl font-bold">
-         */}
-        {/* <h1 className="text-2xl md:text-3xl font-bold"> */}
-        {/* Welcome back, John! 👋 */}
-        {/* </h1> */}
-
-        {/* <p className="text-gray-400 mt-2"> */}
-        {/* Track your progress and achieve your goals. */}
-        {/* </p> */}
-        {/* </div> */}
-
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-5 mb-8">
           {/* Left */}
 
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">
-              Welcome back, Vijay 👋
+              Welcome Back, {user?.name || "User"} 👋
             </h1>
 
             <p className="text-gray-400 mt-2">
@@ -257,11 +290,7 @@ text-3xl
               <input
                 type="text"
                 placeholder="Search..."
-                className="
-
-        w-full
-
-        bg-[#0B1220]
+                className=" w-full bg-[#0B1220]
 
         border
 
@@ -276,7 +305,6 @@ text-3xl
         pr-4
 
         outline-none
-
         focus:border-[#00E5A8]
 
         "
@@ -342,6 +370,21 @@ text-3xl
             <img
               src="https://i.pravatar.cc/100"
               alt="avatar"
+              onClick={() => navigate("/profile")}
+              className="
+    w-12
+    h-12
+    rounded-full
+    object-cover
+    border-2
+    border-[#00E5A8]
+    cursor-pointer
+  "
+            />
+
+            {/* <img
+              src="https://i.pravatar.cc/100"
+              alt="avatar"
               className="
 
       w-12
@@ -357,7 +400,7 @@ text-3xl
       border-[#00E5A8]
 
       "
-            />
+            /> */}
           </div>
         </div>
 
@@ -385,10 +428,15 @@ mb-6
               value: "12",
               sub: "+2 from last week",
             },
+            // {
+            //   title: "Weight",
+            //   value: "72.5",
+            //   sub: "-1.5kg this month",
+            // },
             {
               title: "Weight",
-              value: "72.5",
-              sub: "-1.5kg this month",
+              value: user?.weight ? `${user.weight} kg` : "--",
+              sub: "Current weight",
             },
             {
               title: "Streak",
@@ -478,6 +526,13 @@ mb-6
               <div className="bg-white/5 rounded-xl p-4">
                 <h3>💪 Upper Body Workout</h3>
                 <p className="text-gray-400 text-sm">45 min</p>
+
+                <p className="text-[#00E5A8] text-sm mt-1">
+                  Goal: {user?.goal || "Set your fitness goal"}
+                </p>
+                <p className="text-[#00E5A8] text-sm mt-2">
+                  Activity Level: {user?.activityLevel || "--"}
+                </p>
               </div>
 
               <div className="bg-white/5 rounded-xl p-4">
@@ -584,7 +639,12 @@ gap-6
 "
             >
               <div className="w-40 h-40 rounded-full border-[10px] border-[#00E5A8] flex flex-col items-center justify-center">
-                <span className="text-4xl font-bold">72.5</span>
+                {/* <span className="text-4xl font-bold">72.5</span>
+
+                <span className="text-gray-400">kg</span> */}
+                <span className="text-4xl font-bold">
+                  {user?.weight || "--"}
+                </span>
 
                 <span className="text-gray-400">kg</span>
               </div>

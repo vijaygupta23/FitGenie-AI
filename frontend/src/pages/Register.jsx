@@ -1,6 +1,56 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import API from "../api/axios";
 
-const Register = () => {
+// const Register = () => {
+
+
+  const Register = () => {
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      setLoading(true);
+
+      const response = await API.post("/auth/register", formData);
+
+      alert(response.data.message);
+
+      navigate("/login");
+    } catch (error) {
+  console.log("REGISTER ERROR:", error);
+  console.log("RESPONSE:", error.response?.data);
+
+  alert(
+    error.response?.data?.message ||
+    error.message ||
+    "Registration failed"
+  );
+} finally {
+      setLoading(false);
+    }
+  };
+
+
+
   return (
     <div className="min-h-screen bg-[#0B0F19] flex items-center justify-center px-4 py-4">
 
@@ -83,7 +133,11 @@ const Register = () => {
             Start your AI-powered fitness journey today.
           </p>
 
-          <form className="mt-4 space-y-2.5">
+          {/* <form className="mt-4 space-y-2.5"> */}
+            <form
+              onSubmit={handleSubmit}
+              className="mt-4 space-y-2.5"
+              >
 
             {/* Name */}
 
@@ -94,6 +148,9 @@ const Register = () => {
 
               <input
                 type="text"
+                 name="name"
+                 value={formData.name}
+                 onChange={handleChange}
                 placeholder="Enter your full name"
                 className="
                   w-full
@@ -120,6 +177,9 @@ const Register = () => {
 
               <input
                 type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
                 placeholder="Enter your email"
                 className="
                   w-full
@@ -146,6 +206,10 @@ const Register = () => {
 
               <input
                 type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+
                 placeholder="Create password"
                 className="
                   w-full
@@ -165,7 +229,30 @@ const Register = () => {
 
             {/* Create Account */}
 
+
+
             <button
+  type="submit"
+  disabled={loading}
+  className="
+    w-full
+    bg-[#00E5A8]
+    text-black
+    font-bold
+    py-2.5
+    rounded-xl
+    transition-all 
+    duration-300
+    hover:scale-[1.02]
+    hover:shadow-[0_0_20px_rgba(0,229,168,0.4)]
+    disabled:opacity-50
+    disabled:cursor-not-allowed
+  "
+>
+  {loading ? "Creating Account..." : "Create Account"}
+</button>
+
+            {/* <button
               type="submit"
               className="
                 w-full
@@ -181,7 +268,7 @@ const Register = () => {
               "
             >
               Create Account
-            </button>
+            </button> */}
 
           </form>
 

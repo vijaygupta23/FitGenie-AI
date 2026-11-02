@@ -16,6 +16,8 @@ import Demo from "./pages/Demo";
 import Faq from "./pages/Faq";
 import Blog from "./pages/Blog";
 import Contact from "./pages/Contact";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
@@ -23,7 +25,16 @@ function App() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/dashboard" element={<Dashboard />} />
+      {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            {" "}
+            <Dashboard />{" "}
+          </ProtectedRoute>
+        }
+      />
       <Route path="/workout" element={<Workout />} />
       <Route path="/diet" element={<Diet />} />
       <Route path="/ai-coach" element={<AICoach />} />
@@ -37,6 +48,15 @@ function App() {
       <Route path="/faq" element={<Faq />} />
       <Route path="/blog" element={<Blog />} />
       <Route path="/contact" element={<Contact />} />
+
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }
